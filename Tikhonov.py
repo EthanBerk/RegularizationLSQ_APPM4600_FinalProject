@@ -3,19 +3,31 @@ import numpy as np
 import math
 from numpy.linalg import inv 
 from numpy.linalg import svd
+from numpy.linalg import qr
 from numpy.linalg import norm
 
 
-def DLS(M, y):
-    MT = np.transpose(M)
-    c = inv(MT @ M) @ MT @ y
+def DLSQR(M, y):
+    Q, R = qr(M)
+    QT = Q.T   
+    c = inv(R) @ QT @ y
     return c
+
 
 
 def TikhonovRegression(M, y, l, G):
     MT = np.transpose(M)
     GT = np.transpose(G)
     c = inv(MT @ M + l * (GT @ G)) @ MT @ y
+    return c
+
+def TikhonovRegressionQR(M, y, l, G):
+    Mp = np.block([[M],[np.sqrt(l)*G]])
+    Z = np.zeros(G.shape[0])
+    yp = np.block([y,Z])
+    Q, R = qr(Mp)
+    QT = Q.T   
+    c = inv(R) @ QT @ yp
     return c
 
 def derivativePolyPenaltyMatrix(x, m):
@@ -40,10 +52,13 @@ def gramPenaltyMatrix(x, m, e):
     D = np.identity(m+1)
     l1 = L[0]
     for j in range(0, m+1):
-        if(L[j] > e * l1):
-            D[j,j] = 0
-        else:
-            D[j,j] = 1
+        D[j,j] = 1/L[j]
+        # if(L[j] > e * l1):
+        #     D[j,j] = 0
+        # else:
+        #     D[j,j] = 1
+            
+    print(D)
     return D @ VT    
 
 
