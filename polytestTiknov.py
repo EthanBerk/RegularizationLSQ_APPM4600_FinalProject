@@ -10,8 +10,8 @@ f = lambda x: 0.217979 * x**5-2.34262*x**4+8.16723*x**3-9.33027*x**2+1.79156
 
 a = 0
 b = 4.7
-x = np.linspace(a, b, 200)
-y =  f(x)+np.random.randn(200)
+x = np.linspace(a, b, 50)
+y =  f(x)+np.random.randn(50)
 
 
 
@@ -21,19 +21,19 @@ yVal = y[::2]
 xTrain = x[1::2]
 yTrain = y[1::2]
 m = 21
-l = np.arange(0, 0.2, 0.0001)
+l = np.arange(0, 0.8, 0.000001)
 sqErr = np.zeros(l.size)
 
 M = GenMPolyBasis(xTrain, m)
-# G = gramPenaltyMatrix(xTrain, m, 0.001)
-G = derivativePolyPenaltyMatrix(xTrain, m)
+G = gramPenaltyMatrixPoly(xTrain, m, 0.001)
+# G = derivativePolyPenaltyMatrix(xTrain, m)
 
 for i in range(0, l.size):
     pTik = TikhonovRegressionQR(M, yTrain, l[i], G)
     yeval = evalPolyFunc(pTik, xVal);
     sqErr[i] = norm(yVal - yeval)**2
-plt.semilogy(l,sqErr, "o")
-plt.xlabel("ln(λ)")
+plt.plot(l,sqErr, "o")
+plt.xlabel("λ")
 plt.ylabel("ln(Sqr Err)")
 plt.show()
 
@@ -46,7 +46,7 @@ plt.show()
 
 pTik2 = TikhonovRegressionQR(M, yTrain, l[np.argmin(sqErr)], G)
 # pTik2 = TikhonovRegression(M, yTrain, 0.4, G)
-# pTik1 = TikhonovRegression(M, yTrain, 0.4, G)
+# pTik3 = TikhonovRegressionQR(M, yTrain, 0.0117, GD)
 # pTik2 = TikhonovRegressionQR(M, yTrain, 0.4, G)
 
 # pTik1 = DLSSVD(M, yTrain)
@@ -63,20 +63,28 @@ yevalTik1  = evalPolyFunc(pTik1, xeval)
 yevalTik2  = evalPolyFunc(pTik2, xeval)
 
 
-plt.plot(xeval,f(xeval), label = "f(x)")
-plt.plot(xVal,yVal, 'o', label = "Validation")
-plt.plot(xTrain,yTrain, 'x', label = "Training")
-# plt.plot(xeval,yevalDLS)
-plt.plot(xeval,yevalTik2, label = f"λ = {l[np.argmin(sqErr)]}")
-# plt.plot(xeval,yevalTik1, label = "SVD")
-plt.plot(xeval,yevalTik1, label = "QR")
+# # plt.plot(xeval,f(xeval), label = "f(x)")
+# # plt.plot(xVal,yVal, 'o', label = "Validation")
+# plt.plot(xTrain,yTrain, 'x', label = "Training")
+# # plt.plot(xeval,yevalDLS)
+# plt.plot(xeval,yevalTik2, label = f"Tikhnov: λ = {l[np.argmin(sqErr)]}")
+# # plt.plot(xeval,yevalTik1, label = "SVD")
+# plt.plot(xeval,yevalTik1, label = "DLS without penalty")
+# plt.legend()
+# plt.show()
 
 
-plt.legend()
-plt.show()
+
+# plt.plot(xeval,f(xeval), label = "f(x)")
+# plt.plot(xeval,yevalTik2, label = f"Tikhnov: λ = {l[np.argmin(sqErr)]}")
+# plt.plot(xeval,yevalTik1, label = "DLS without penalty")
+# plt.legend()
+# plt.show()
 
 yerreval1 = evalPolyFunc(pTik1, xVal);
 yerreval2 = evalPolyFunc(pTik2, xVal);
 
-print(f"DLS error =  {norm(yVal - yerreval1)**2}")
-print(f"Tikhonov err =  {norm(yVal - yerreval2)**2}")
+print(f"DLS error =  {norm(f(xeval) - yevalTik1)**2}")
+print(f"Tikhonov err =  {norm(f(xeval) - yevalTik2)**2}")
+print(f"Tikhonov l =  {l[np.argmin(sqErr)]}")
+# print({l[np.argmin(sqErr)]})

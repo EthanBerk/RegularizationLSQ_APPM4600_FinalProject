@@ -45,21 +45,40 @@ def derivativeTrigPenaltyMatrix(x, m):
     return D
 
 
-def gramPenaltyMatrix(x, m, e):
+def gramPenaltyMatrixPoly(x, m, e):
     M = GenMPolyBasis(x,m)
     U, s, VT = svd(M)
     L = s**2
     D = np.identity(m+1)
     l1 = L[0]
     for j in range(0, m+1):
-        D[j,j] = 1/L[j]
-        # if(L[j] > e * l1):
-        #     D[j,j] = 0
-        # else:
-        #     D[j,j] = 1
+        # D[j,j] = 1/L[j]
+        if(L[j] > e * l1):
+            D[j,j] = 0
+        else:
+            D[j,j] = 1
+           
+    return D @ VT    
+
+
+def gramPenaltyMatrixTrig(x, m, e):
+    M = GenMTrigBasis(x,m)
+    # print(M)
+    U, s, VT = svd(M)
+    L = s**2
+    print(s)
+    D = np.identity(2*m+1)
+    l1 = L[0]
+    for j in range(0, 2*m+1):
+        # D[j,j] = 1/L[j]
+        if(L[j] > e * l1):
+            D[j,j] = 0
+        else:
+            D[j,j] = 1
             
     print(D)
-    return D @ VT    
+           
+    return D @ VT   
 
 
 def lowPassPenaltyMatrix(m, k0, c, d):
